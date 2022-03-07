@@ -1,6 +1,6 @@
 #pragma once
 #include <SPI.h>
-//#include "fonts/fonts.hpp"
+#include "fonts/fonts.hpp"
 
 #define SSD1351_CMD_SETCOLUMN       0x15
 #define SSD1351_CMD_SETROW          0x75
@@ -47,8 +47,10 @@
 #define swap(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
 namespace oled {
+	uint16_t textColor, backgroundColor;
 	uint8_t buffer[128 * 128 * 2];
-	uint8_t width = 128, height = 128;
+	uint8_t width = 128, height = 128, cursorX, cursorY, fontW, fontH;
+	const uint8_t* font;
 	int cs = 15, dc = 4, rst = 5;
 
 	void write(uint8_t c) {
@@ -110,11 +112,54 @@ namespace oled {
 		}
 	}
 
+	void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, uint8_t thickness = 1) {
+		int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+		if (steep) {
+			swap(x0, y0);
+			swap(x1, y1);
+		}
+
+		if (x0 > x1) {
+			swap(x0, x1);
+			swap(y0, y1);
+		}
+
+		int16_t dx, dy;
+		dx = x1 - x0;
+		dy = abs(y1 - y0);
+
+		int16_t err = dx / 2;
+		int16_t ystep;
+
+		if (y0 < y1) {
+			ystep = 1;
+		} else {
+			ystep = -1;
+		}
+
+		for (; x0 <= x1; x0++) {
+			if (steep) {
+				fillRect(y0 - thickness / 2, x0 - thickness / 2, thickness, thickness, color);
+			} else {
+				fillRect(x0 - thickness / 2, y0 - thickness / 2, thickness, thickness, color);
+			}
+			err -= dy;
+			if (err < 0) {
+				y0 += ystep;
+				err += dx;
+			}
+		}
+	}
+
 	void fillScreen(uint16_t color) {
 		fillRect(0, 0, width, height, color);
 	}
 	
-	void drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t bitmap[], uint16_t color, uint16_t background = 0x0000) {
+	void clear() {
+		fillScreen(backgroundColor);
+	}
+	
+	void drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t bitmap[], uint16_t color = textColor, uint16_t background = backgroundColor) {
 		if (x >= width || y >= height || x < 0 || y < 0) return;
 		
 		for (uint8_t x1 = 0; x1 < w; x1++) {
@@ -165,6 +210,55 @@ namespace oled {
 			}
 		}
 	}*/
+
+	void setFont(const uint8_t* font) {
+		oled::font = font;
+		fontW = pgm_read_byte(&font[0]);
+		fontH = pgm_read_byte(&font[1]);
+	}
+
+	void setCursor(uint8_t x, uint8_t y) {
+		cursorX = x;
+		cursorY = y;
+	}
+
+	void setTextColor(uint16_t color, uint16_t background = BLACK) {
+		textColor = color;
+		backgroundColor = background;
+	}
+
+	uint8_t getStringWidth(String s) {
+		return s.length() * fontW;
+	}
+
+	uint8_t getCharHeight() {
+		return fontH;
+	}
+
+	void writeChar(uint8_t c) {
+		if(c > 31 && c < 127) {
+      drawBitmap(cursorX, cursorY, fontW, fontH, &font[(c - 32) * fontW * fontH / 8 + 2]);
+		}
+		cursorX += fontW;
+		if(c == '\r') {
+			cursorX = 0;
+		}
+		if(c == '\n' || cursorX > width - fontW) {
+			cursorX = 0;
+			cursorY += fontH;
+		}
+	}
+
+	void print(String s) {
+		for(uint16_t i = 0; i < s.length(); i++) {
+			writeChar(s[i]);
+		}
+	}
+
+	void println(String s) {
+		print(s);
+		writeChar('\n');
+	}
 
 	void update() {
 		setAddressWindow(0, 0, width, height);
@@ -241,7 +335,10 @@ namespace oled {
 		writeCmd(0xAF); //Sleep mode On (Display ON)
 
 		delay(100);
-		fillScreen(BLACK);
+		setCursor(0, 0);
+		setFont(font8x12);
+		setTextColor(WHITE);
+		clear();
 		update();
 	}
 }

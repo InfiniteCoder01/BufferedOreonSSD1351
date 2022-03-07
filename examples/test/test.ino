@@ -13,7 +13,7 @@ void setup()  {
   }
   delay(1000);
   oled::fillScreen(BLACK);
-  oled::drawBitmap(0, 0, 16, 16, bmp, RED, WHITE); // background color is optional
+  oled::drawBitmap(0, 0, 16, 16, bmp, RED, WHITE); // bitmap and background color's are optional
   oled::drawImage(16, 0, 16, 16, img);
 	oled::update();
 }
