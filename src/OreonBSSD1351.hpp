@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include <SPI.h>
 #include <fonts/fonts.hpp>
 #include <OreonMath.hpp>
