@@ -1,5 +1,6 @@
-const unsigned char PROGMEM font8x12[] = { // width, height, font
-  8, 12,
+const unsigned char PROGMEM font8x12[] = {
+  // width, height, type, font
+  8, 12, 0,
   // @12 ' ' (7 pixels wide)
   0x00, //        
   0x00, //        

@@ -1,18 +1,24 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Arduino",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/hardware/esp32/2.0.5/tools/sdk/esp32/ld/",
+                "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/hardware/esp32/2.0.5/**",
+                "D:/Dev/Arduino/libraries/LinkedList/"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "F_CPU=16000000L",
+                "ARDUINO=10805",
             ],
-            "cStandard": "c17",
+            "compilerPath": "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-g++.exe",
+            "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
