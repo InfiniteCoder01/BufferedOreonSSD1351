@@ -6,6 +6,10 @@ namespace Math {
 template <typename T> inline bool inRange(T val, T _min, T _max) { return val >= _min && val < _max; }
 template <typename T> inline bool inRangeW(T val, T _min, T size) { return inRange(val, _min, _min + size); }
 template <typename T> inline int sign(T val) { return (val > 0) - (val < 0); }
+template <typename T> inline T abs(T val) { return val < 0 ? -val : val; }
+inline int floor(float val) { return val < 0 ? (int)(val - 0.999999) : (int)val; }
+inline int ceil(float val) { return val < 0 ? (int)val : (int)(val + 0.999999); }
+inline int round(float val) { return val < 0 ? -val : val; }
 inline int wrap(int val, int _max) {
   if (val < 0) return _max - abs(val) % _max;
   return val % _max;
@@ -23,8 +27,12 @@ template <typename T, typename T1> inline void swap(T& a, T1& b) {
 
 template <typename T, typename T1> inline T min(T a, T1 b) { return a < b ? a : (T)b; }
 template <typename T, typename T1> inline T max(T a, T1 b) { return a > b ? a : (T)b; }
-template <typename T> inline T clamp(T val, T _min, T _max) { return min(max(val, _min), _max); }
-template <typename T> inline T clampW(T val, T _min, T size) { return clamp(val, _min, _min + size); }
+template <typename T, typename T1, typename T2> inline T clamp(T val, T1 _min, T2 _max) { return min(max(val, _min), _max); }
+template <typename T, typename T1, typename T2> inline T clampW(T val, T1 _min, T2 size) { return clamp(val, _min, _min + size); }
+static float smoothstep(float _min, float _max, float t) {
+  t = clamp((t - _min) / (_max - _min), 0, 1);
+  return t * t * (3 - 2 * t);
+}
 }  // namespace Math
 
 namespace VectorMath {
@@ -158,29 +166,50 @@ template <typename T> const vec3<T> vec3<T>::zero = vec3<T>(0);
 template <typename T> const vec3<T> vec3<T>::one = vec3<T>(1);
 template <typename T> const vec3<T> vec3<T>::left = vec3<T>(-1, 0, 0);
 template <typename T> const vec3<T> vec3<T>::right = vec3<T>(1, 0, 0);
-template <typename T> const vec3<T> vec3<T>::up = vec3<T>(0, -1, 0);
-template <typename T> const vec3<T> vec3<T>::down = vec3<T>(0, 1, 0);
+template <typename T> const vec3<T> vec3<T>::up = vec3<T>(0, 1, 0);
+template <typename T> const vec3<T> vec3<T>::down = vec3<T>(0, -1, 0);
 template <typename T> const vec3<T> vec3<T>::forward = vec3<T>(0, 0, 1);
 template <typename T> const vec3<T> vec3<T>::backward = vec3<T>(0, 0, -1);
 
+#ifndef min
 template <typename T> inline vec2<T> min(const vec2<T>& a, const vec2<T>& b) { return vec2<T>(Math::min(a.x, b.x), Math::min(a.y, b.y)); }
 template <typename T> inline vec2<T> max(const vec2<T>& a, const vec2<T>& b) { return vec2<T>(Math::max(a.x, b.x), Math::max(a.y, b.y)); }
-template <typename T> inline vec2<T> lerp(const vec2<T>& a, const vec2<T>& b, float t) { return vec2<T>(Math::lerp(a.x, b.x, t), Math::lerp(a.y, b.y, t)); }
-
 template <typename T> inline vec3<T> min(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(Math::min(a.x, b.x), Math::min(a.y, b.y), Math::min(a.z, b.z)); }
 template <typename T> inline vec3<T> max(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(Math::max(a.x, b.x), Math::max(a.y, b.y), Math::max(a.z, b.z)); }
+#endif
+
+template <typename T> inline vec2<T> lerp(const vec2<T>& a, const vec2<T>& b, float t) { return vec2<T>(Math::lerp(a.x, b.x, t), Math::lerp(a.y, b.y, t)); }
 template <typename T> inline vec3<T> lerp(const vec3<T>& a, const vec3<T>& b, float t) { return vec3<T>(Math::lerp(a.x, b.x, t), Math::lerp(a.y, b.y, t), Math::lerp(a.z, b.z, t)); }
 
 // clang-format off
-template<typename T> T inline sqrDistance(const vec2<T>& a, vec2<T>& b) { vec2<T> v = b - a; return v.sqrMagnitude(); }
-template<typename T> T inline distance(const vec2<T>& a, vec2<T>& b) { vec2<T> v = b - a; return v.magnitude(); }
+template<typename T> T inline sqrDistance(const vec2<T>& a, const vec2<T>& b) { vec2<T> v = b - a; return v.sqrMagnitude(); }
+template<typename T> T inline distance(const vec2<T>& a, const vec2<T>& b) { vec2<T> v = b - a; return v.magnitude(); }
 
-template<typename T> T inline sqrDistance(const vec3<T>& a, vec3<T>& b) { vec3<T> v = b - a; return v.sqrMagnitude(); }
-template<typename T> T inline distance(const vec3<T>& a, vec3<T>& b) { vec3<T> v = b - a; return v.magnitude(); };
+template<typename T> T inline sqrDistance(const vec3<T>& a, const vec3<T>& b) { vec3<T> v = b - a; return v.sqrMagnitude(); }
+template<typename T> T inline distance(const vec3<T>& a, const vec3<T>& b) { vec3<T> v = b - a; return v.magnitude(); };
 // clang-format on
 
 template <typename T> inline T dot(const vec3<T>& a, const vec3<T>& b) { return a.dot(b); }
 template <typename T> inline vec3<T> cross(const vec3<T>& a, const vec3<T>& b) { return a.cross(b); }
+
+template <typename T> inline vec2<T> abs(vec2<T> v) { return vec2<T>(Math::abs(v.x), Math::abs(v.y)); }
+template <typename T> inline vec3<T> abs(vec3<T> v) { return vec3<T>(Math::abs(v.x), Math::abs(v.y), Math::abs(v.z)); }
+
+inline vec2<int> floor(vec2<float> v) { return vec2<int>(Math::floor(v.x), Math::floor(v.y)); }
+inline vec3<int> floor(vec3<float> v) { return vec3<int>(Math::floor(v.x), Math::floor(v.y), Math::floor(v.z)); }
+
+inline vec2<int> ceil(vec2<float> v) { return vec2<int>(Math::ceil(v.x), Math::ceil(v.y)); }
+inline vec3<int> ceil(vec3<float> v) { return vec3<int>(Math::ceil(v.x), Math::ceil(v.y), Math::ceil(v.z)); }
+
+inline vec2<int> round(vec2<float> v) { return vec2<int>(Math::round(v.x), Math::round(v.y)); }
+inline vec3<int> round(vec3<float> v) { return vec3<int>(Math::round(v.x), Math::round(v.y), Math::round(v.z)); }
+
+template <typename T> static vec3<T> rotateAround(vec3<T> v, vec3<T> axis, float angle) {
+  vec3<T> parallel = axis * dot(v, axis) / dot(axis, axis);
+  vec3<T> perpendicular = v - parallel;
+  vec3<T> w = cross(axis, perpendicular);
+  return (parallel + perpendicular * cos(angle) + w.normalized() * perpendicular.magnitude() * sin(angle));
+}
 
 typedef vec2<int> vec2i;
 typedef vec2<float> vec2f;
