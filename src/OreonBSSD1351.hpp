@@ -82,8 +82,8 @@ enum TextAlignment : int8_t { LEFT = -1, CENTER = 0, RIGHT = 1 };
 extern SPISettings _SPISettings;
 #endif
 
-extern uint8_t buffer[128 * 128 * 2ULL];
-extern uint8_t *bufferW;
+extern uint8_t* buffer;
+extern uint8_t* bufferW;
 
 extern float textSize;
 extern uint16_t textColor, backgroundColor;
@@ -484,15 +484,15 @@ OREON_BSSD_DECL void begin(int _cs, int _dc, int _rst) {
   flip = false;
   wrap = true;
   pageR = width;
-#ifdef TRIPPLE_BUFFER  // TODO: !!!
+#ifdef TRIPPLE_BUFFER
   bufferW = new uint8_t[width * height * 2];
 #endif
   clear();
   update();
 }
 
-#ifdef TRIPPLE_BUFFER  // TODO: !!!
-inline void swapBuffers() { memcpy(bufferW, buffer, width * height * 2); }
+#ifdef TRIPPLE_BUFFER
+inline void swapBuffers() { Math::swap(bufferW, buffer); }
 #endif
 
 ALWAYS_INLINE void setAddressWindow(VectorMath::vec2i pos, VectorMath::vec2i size) { setAddressWindow(pos.x, pos.y, size.x, size.y); }

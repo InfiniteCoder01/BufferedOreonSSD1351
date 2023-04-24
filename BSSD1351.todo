@@ -1,2 +1,5 @@
  ☐ Add TileEngine example
  ☐ Add RP2040 support
+ ☐ ECS
+ ☐ SPI.setFrequency
+ ☐ Write doc

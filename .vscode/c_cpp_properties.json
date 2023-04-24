@@ -4,21 +4,20 @@
             "name": "Arduino",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/hardware/esp32/2.0.5/tools/sdk/esp32/ld/",
-                "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/hardware/esp32/2.0.5/**",
-                "D:/Dev/Arduino/libraries/LinkedList/"
+                "/home/infinitecoder/.arduino15/packages/esp32/hardware/esp32/2.0.7/**",
+                "/run/media/infinitecoder/D/Dev/Arduino/libraries/LinkedList/"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
                 "F_CPU=16000000L",
-                "ARDUINO=10805",
+                "ARDUINO=10805"
             ],
-            "compilerPath": "C:/Users/InfiniteCoder/AppData/Local/Arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2-patch3/bin/xtensa-esp32-elf-g++.exe",
+            "compilerPath": "/home/infinitecoder/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/esp-2021r2-patch5-8.4.0/bin/xtensa-esp32-elf-g++",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

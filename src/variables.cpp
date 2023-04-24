@@ -7,7 +7,7 @@ namespace oled {
 SPISettings _SPISettings = SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0);
 #endif
 
-uint8_t buffer[128 * 128 * 2UL];
+uint8_t* buffer = new uint8_t[128 * 128 * 2ULL];
 uint8_t* bufferW = buffer;
 
 float textSize;
@@ -18,20 +18,14 @@ bool fontType;
 int8_t cs, dc, rst;
 int8_t textAlignment = LEFT;
 bool flip, wrap;
-}  // namespace oled
+} // namespace oled
 
 namespace TileEngine {
-uint16_t levelWidth, levelHeight;
 vec2i camera;
-
-const uint8_t* levelTiles;
-uint16_t* objectToAtlas = nullptr;
-LinkedList<Object> objects;
-LoadObject loadObject;
-UpdateObject updateObject;
-CollideObject collideObject;
+LinkedList<GameObject> objects;
+LoadComponentFunction loadUserComponent;
 
 Atlas* atlases = nullptr;
 Level* levels = nullptr;
-bool ownAtlases = false;
-}  // namespace TileEngine
+Level* level = nullptr;
+} // namespace TileEngine
