@@ -4,7 +4,7 @@
 namespace oled {
 /********** VARIABLES **********/
 #if defined(SPI_HAS_TRANSACTION)
-SPISettings _SPISettings = SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0);
+SPISettings _SPISettings;
 #endif
 
 uint8_t* buffer = new uint8_t[128 * 128 * 2ULL];
@@ -22,7 +22,7 @@ bool flip, wrap;
 
 namespace TileEngine {
 vec2i camera;
-LinkedList<GameObject> objects;
+Container::Vector<GameObject*> objects;
 LoadComponentFunction loadUserComponent;
 
 Atlas* atlases = nullptr;

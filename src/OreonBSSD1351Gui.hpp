@@ -3,6 +3,21 @@
 #include "OreonBSSD1351.hpp"
 
 namespace gui {
+OREON_BSSD_DECL void darkenRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t alpha) {
+  if (x >= oled::width || y >= oled::height || x <= -w || y <= -h) return;
+
+  if (x < 0) w += x, x = 0;
+  if (y < 0) h += y, y = 0;
+  if (x + w > oled::width) w = oled::width - x;
+  if (y + h > oled::height) h = oled::height - y;
+
+  for (uint8_t x1 = x; x1 < x + w; x1++) {
+    for (uint8_t y1 = y; y1 < y + h; y1++) {
+      oled::_setPixel(x1, y1, oled::darkenColor(oled::_getPixel(x1, y1), alpha));
+    }
+  }
+}
+
 OREON_BSSD_DECL void centerText(String text, int y = -1) {
   oled::setCursor(oled::width / 2 - oled::getStringWidth(text) / 2, (y == -1 ? (oled::height / 2 - oled::getCharHeight() / 2) : y));
   oled::println(text);

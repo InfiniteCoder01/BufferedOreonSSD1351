@@ -88,7 +88,7 @@ extern uint8_t* bufferW;
 extern float textSize;
 extern uint16_t textColor, backgroundColor;
 extern uint8_t width, height, cursorX, cursorY, pageX, pageR, fontW, fontH;
-extern const uint8_t *font;
+extern const uint8_t* font;
 extern bool fontType;
 extern int8_t cs, dc, rst;
 extern int8_t textAlignment;
@@ -100,11 +100,25 @@ inline uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) { return (r >> 3) | (g >
 ALWAYS_INLINE uint16_t rgb565to565(uint8_t r, uint8_t g, uint8_t b) { return r | (g << 5) | (b << 11); }
 
 OREON_BSSD_DECL uint16_t interpolateColor(uint16_t color1, uint16_t color2, float k) {
-  int r1 = (color1 & 0b00011111), g1 = (color1 >> 5 & 0b00111111), b1 = (color1 >> 11 & 0b00011111);
-  int r2 = (color2 & 0b00011111), g2 = (color2 >> 5 & 0b00111111), b2 = (color2 >> 11 & 0b00011111);
-  int r = Math::lerp(r1, r2, k);
-  int g = Math::lerp(g1, g2, k);
-  int b = Math::lerp(b1, b2, k);
+  uint8_t r1 = (color1 & 31), g1 = (color1 >> 5 & 63), b1 = (color1 >> 11 & 31);
+  uint8_t r2 = (color2 & 31), g2 = (color2 >> 5 & 63), b2 = (color2 >> 11 & 31);
+  uint8_t r = Math::lerp(r1, r2, k);
+  uint8_t g = Math::lerp(g1, g2, k);
+  uint8_t b = Math::lerp(b1, b2, k);
+  return rgb565to565(r, g, b);
+}
+
+OREON_BSSD_DECL uint16_t contrastColor(uint16_t color) {
+  uint8_t r = (color & 31), g = (color >> 6 & 31), b = (color >> 11 & 31);
+  uint8_t brightness = ((uint16_t)r + g + b) / 3;
+  return brightness < 16 ? WHITE : BLACK;
+}
+
+OREON_BSSD_DECL uint16_t darkenColor(uint16_t color, uint8_t alpha) {
+  uint8_t r = (color & 31), g = (color >> 5 & 63), b = (color >> 11 & 31);
+  r = (uint16_t)r * alpha / 255;
+  g = (uint16_t)g * alpha / 255;
+  b = (uint16_t)b * alpha / 255;
   return rgb565to565(r, g, b);
 }
 
@@ -286,10 +300,11 @@ OREON_BSSD_DECL void drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, cons
       uint16_t index = min((int)round(x1 / scale), w - 1) + min((int)round(y1 / scale), h - 1) * Math::alignUp(w, 8);
       if (yx) index = min((int)round(y1 / scale), h - 1) + min((int)round(x1 / scale), w - 1) * Math::alignUp(h, 8);
       if (index / 8 != position) _byte = pgm_read_byte(&bitmap[index / 8]);
+      uint8_t u = x + (flip ? w * scale - x1 - 1 : x1), v = y + (yx ? h * scale - y1 - 1 : y1);
       if (bitRead(_byte, 7 - index % 8)) {
-        _setPixel(x + (flip ? w * scale - x1 - 1 : x1), y + (yx ? h * scale - y1 - 1 : y1), color);
+        _setPixel(u, v, color == MAGENTA ? contrastColor(_getPixel(u, v)) : color);
       } else if (background != color) {
-        _setPixel(x + (flip ? w * scale - x1 - 1 : x1), y + (yx ? h * scale - y1 - 1 : y1), background);
+        _setPixel(u, v, background);
       }
     }
   }
@@ -345,13 +360,14 @@ OREON_BSSD_DECL void drawImage(int16_t x, int16_t y, int16_t w, int16_t h, const
 
 inline void setTextSize(float size) { textSize = size; }
 
-OREON_BSSD_DECL void setFont(const uint8_t *font) {
+OREON_BSSD_DECL void setFont(const uint8_t* font) {
   oled::font = font + 3;
   fontW = pgm_read_byte(&font[0]);
   fontH = pgm_read_byte(&font[1]);
   fontType = pgm_read_byte(&font[2]);
 }
 
+inline VectorMath::vec2u getCursor() { return {cursorX, cursorY}; }
 inline void setCursor(uint8_t x, uint8_t y) {
   cursorX = x;
   cursorY = y;
@@ -382,7 +398,7 @@ OREON_BSSD_DECL void write(uint8_t c) {
 
 OREON_BSSD_DECL void print(String s) {
   // TODO: textAlignment
-  for (char *c = s.begin(); c != s.end(); c++) write(*c);
+  for (char* c = s.begin(); c != s.end(); c++) write(*c);
 }
 
 OREON_BSSD_DECL void println(String s) { print(s + '\n'); }
@@ -416,6 +432,7 @@ OREON_BSSD_DECL void begin(int _cs, int _dc, int _rst) {
   SPI.begin();
   // SPI.setFrequency(SPI_SPEED);
   // SPI.setBitOrder(MSBFIRST);
+  _SPISettings = SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0);
   digitalWrite(cs, LOW);
 
   if (_rst != -1) {
@@ -427,54 +444,54 @@ OREON_BSSD_DECL void begin(int _cs, int _dc, int _rst) {
     delay(10);
   }
 
-  writeCmd(0xFD);   // Set Command Lock
-  writeData(0x12);  // Unlock OLED driver IC MCU interface from entering command
-  writeCmd(0xFD);   // Set Command Lock
-  writeData(0xB1);  // Command A2,B1,B3,BB,BE,C1 accessible if in unlock state
-  writeCmd(0xAE);   // Sleep mode On (Display OFF)
-  writeCmd(0xB3);   // Front Clock Divider
-  writeCmd(0xF1);   // 7:4 = Oscillator Frequency, 3:0 = CLK Div Ratio (A[3:0]+1 = 1..16)
-  writeCmd(0xCA);   // Set MUX Ratio
+  writeCmd(0xFD);  // Set Command Lock
+  writeData(0x12); // Unlock OLED driver IC MCU interface from entering command
+  writeCmd(0xFD);  // Set Command Lock
+  writeData(0xB1); // Command A2,B1,B3,BB,BE,C1 accessible if in unlock state
+  writeCmd(0xAE);  // Sleep mode On (Display OFF)
+  writeCmd(0xB3);  // Front Clock Divider
+  writeCmd(0xF1);  // 7:4 = Oscillator Frequency, 3:0 = CLK Div Ratio (A[3:0]+1 = 1..16)
+  writeCmd(0xCA);  // Set MUX Ratio
   writeData(127);
-  writeCmd(0xA0);        // Set Re-map
-  writeData(B01110100);  // 65k color
+  writeCmd(0xA0);       // Set Re-map
+  writeData(B01110100); // 65k color
   // writeData(B10110100); //262k color
   // writeData(B11110100); //262k color, 16-bit format 2
-  writeCmd(0x15);     // Set Column
-  writeData(0);       // start
-  writeData(width);   // end
-  writeCmd(0x75);     // Set Row
-  writeData(0);       // start
-  writeData(height);  // end
-  writeCmd(0xA1);     // Set Display Start Line
+  writeCmd(0x15);    // Set Column
+  writeData(0);      // start
+  writeData(width);  // end
+  writeCmd(0x75);    // Set Row
+  writeData(0);      // start
+  writeData(height); // end
+  writeCmd(0xA1);    // Set Display Start Line
   writeData(0);
-  writeCmd(0xA2);  // Set Display Offset
+  writeCmd(0xA2); // Set Display Offset
   writeData(0);
-  writeCmd(0xB5);  // Set GPIO
+  writeCmd(0xB5); // Set GPIO
   writeData(0);
-  writeCmd(0xAB);   // Function Selection
-  writeData(0x01);  // Enable internal Vdd /8-bit parallel
+  writeCmd(0xAB);  // Function Selection
+  writeData(0x01); // Enable internal Vdd /8-bit parallel
   // writeData(B01000001); //Enable internal Vdd /Select 16-bit parallel interface
-  writeCmd(0xB1);  // Set Reset(Phase 1) /Pre-charge(Phase 2)
+  writeCmd(0xB1); // Set Reset(Phase 1) /Pre-charge(Phase 2)
   // writeCmd(B00110010); //5 DCLKs / 3 DCLKs
   writeCmd(0x74);
-  writeCmd(0xBE);   // Set VCOMH Voltage
-  writeCmd(0x05);   // 0.82 x VCC [reset]
-  writeCmd(0xA6);   // Reset to normal display
-  writeCmd(0xC1);   // Set Contrast
-  writeData(0xC8);  // Red contrast (reset=0x8A)
-  writeData(0x80);  // Green contrast (reset=0x51)
-  writeData(0xC8);  // Blue contrast (reset=0x8A)
-  writeCmd(0xC7);   // Master Contrast Current Control
-  writeData(0x0F);  // 0-15
-  writeCmd(0xB4);   // Set Segment Low Voltage(VSL)
+  writeCmd(0xBE);  // Set VCOMH Voltage
+  writeCmd(0x05);  // 0.82 x VCC [reset]
+  writeCmd(0xA6);  // Reset to normal display
+  writeCmd(0xC1);  // Set Contrast
+  writeData(0xC8); // Red contrast (reset=0x8A)
+  writeData(0x80); // Green contrast (reset=0x51)
+  writeData(0xC8); // Blue contrast (reset=0x8A)
+  writeCmd(0xC7);  // Master Contrast Current Control
+  writeData(0x0F); // 0-15
+  writeCmd(0xB4);  // Set Segment Low Voltage(VSL)
   writeData(0xA0);
   writeData(0xB5);
   writeData(0x55);
-  writeCmd(0xB6);   // Set Second Precharge Period
-  writeData(0x01);  // 1 DCLKS
-  writeCmd(0x9E);   // Scroll Stop Moving
-  writeCmd(0xAF);   // Sleep mode On (Display ON)
+  writeCmd(0xB6);  // Set Second Precharge Period
+  writeData(0x01); // 1 DCLKS
+  writeCmd(0x9E);  // Scroll Stop Moving
+  writeCmd(0xAF);  // Sleep mode On (Display ON)
 
   delay(100);
   setCursor(0, 0);
@@ -513,4 +530,4 @@ ALWAYS_INLINE void drawImage(VectorMath::vec2i pos, VectorMath::vec2i size, cons
 
 ALWAYS_INLINE void setCursor(VectorMath::vec2i pos) { setCursor(pos.x, pos.y); }
 ALWAYS_INLINE void update(VectorMath::vec2i pos, VectorMath::vec2i size) { update(pos.x, pos.y, size.x, size.y); }
-}  // namespace oled
+} // namespace oled
