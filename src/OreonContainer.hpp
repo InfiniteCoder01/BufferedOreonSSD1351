@@ -169,7 +169,7 @@ public:
 
   void erase(size_t pos, size_t count) {
     assert(pos < m_Size && "Index out of range!");
-    assert(m_Size >= count && "Erasing more then size of the vector!");
+    assert(pos + count <= m_Size && "Erasing more then size of the vector!");
     shrink(pos, count);
   }
 
@@ -206,12 +206,36 @@ template <typename M, typename N> struct Pair {
 
 template <typename K, typename V> class VectorMap : public Vector<Pair<K, V>> {
 public:
+  using Vector<Pair<K, V>>::at;
+  using Vector<Pair<K, V>>::erase;
+  using Vector<Pair<K, V>>::operator[];
+
+  Pair<K, V>* find(const K& key) {
+    for (auto& pair : *this) {
+      if (pair.first == key) return &pair;
+    }
+    return Vector<Pair<K, V>>::end();
+  }
+
+  bool contains(const K& key) { return find(key) != Vector<Pair<K, V>>::end(); }
+
   V& at(const K& key) {
     for (auto& pair : *this) {
       if (pair.first == key) return pair.second;
     }
     Vector<Pair<K, V>>::push_back(Pair<K, V>(key, V()));
     return Vector<Pair<K, V>>::back().second;
+  }
+
+  void erase(const K& key) {
+    auto it = Vector<Pair<K, V>>::begin();
+    while (it != Vector<Pair<K, V>>::end()) {
+      if (it->first == key) {
+        Vector<Pair<K, V>>::erase(it);
+        return;
+      }
+      it++;
+    }
   }
 
   V& operator[](const K& key) { return at(key); }

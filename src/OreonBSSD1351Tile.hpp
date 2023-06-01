@@ -127,6 +127,7 @@ struct Level {
 extern Atlas* atlases;
 extern Level* levels;
 extern Level* level;
+extern int32_t levelIndex;
 #pragma endregion Cache
 #pragma region Interface
 OREON_BSSD_DECL void drawTileFromAtlas(vec2i pos, uint8_t frame, const Atlas& atlas, bool flip = false) {
@@ -148,6 +149,7 @@ OREON_BSSD_DECL GameObject& spawn(vec2i pos, Container::Vector<Component*> compo
 }
 
 OREON_BSSD_DECL void loadLevel(uint8_t index) {
+  levelIndex = index;
   objects.clear();
   level = &levels[index];
   const uint8_t* data = level->objects;
@@ -261,8 +263,11 @@ struct AtlasRenderer : public Component {
   bool flip = false;
 
   AtlasRenderer(uint16_t atlas) : Component(), atlas(atlas) {}
+
+  Atlas& getAtlas() { return atlases[atlas]; }
+
+  void update(GameObject& object) { object.size = atlases[atlas].size(); }
   void draw(GameObject& object) override {
-    object.size = atlases[atlas].size();
     if (frame >= 0) drawTileFromAtlas(object.pos, frame, atlas, flip);
   }
 

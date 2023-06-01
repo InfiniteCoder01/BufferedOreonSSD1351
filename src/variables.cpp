@@ -28,4 +28,5 @@ LoadComponentFunction loadUserComponent;
 Atlas* atlases = nullptr;
 Level* levels = nullptr;
 Level* level = nullptr;
+int32_t levelIndex = -1;
 } // namespace TileEngine
