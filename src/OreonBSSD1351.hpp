@@ -406,20 +406,16 @@ OREON_BSSD_DECL void println(String s) { print(s + '\n'); }
 OREON_BSSD_DECL void update(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
   setAddressWindow(x, y, w, h);
   for (uint8_t y1 = y; y1 < y + h; y1++) {
-    for (uint8_t x1 = x; x1 < x + w; x1++) {
-      uint32_t index = y1 * width + x1;
-      if ((x + w) - x1 > 1) {
-        writeSPI32(bufferW[index * 2] << 24 | bufferW[index * 2 + 1] << 16 | bufferW[index * 2 + 2] << 8 | bufferW[index * 2 + 3]);
-        x1++;
-      } else {
-        writeSPI16(bufferW[index * 2] << 8 | bufferW[index * 2 + 1]);
-      }
-    }
+    SPI.writeBytes((uint8_t*)&bufferW[y1 * width], w * 2);
   }
   endWrite();
 }
 
-inline void update() { update(0, 0, width, height); }
+OREON_BSSD_DECL void update() {
+  setAddressWindow(0, 0, width, height);
+  SPI.writeBytes((uint8_t*)bufferW, width * height * 2);
+  endWrite();
+}
 
 OREON_BSSD_DECL void begin(int _cs, int _dc, int _rst) {
   cs = _cs;
