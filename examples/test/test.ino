@@ -14,7 +14,9 @@ String listElements[] = {
 
 void setup()  {
   Serial.begin(115200);
+#ifdef SPI_HAS_TRANSACTION
   SPI.setFrequency(SPI_SPEED); // OreonBSSD1351.hpp defines best SPI speed
+#endif
   oled.begin(5, 17, 16); // cs, dc, rst
 
   oled.fillScreen(YELLOW); // after oled.begin() screen is black
