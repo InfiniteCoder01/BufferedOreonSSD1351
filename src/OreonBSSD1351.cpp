@@ -193,7 +193,7 @@ void OreonBSSD1351::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uin
 }
 
 /********** IMAGES **********/
-void OreonBSSD1351::drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const PROGMEM uint8_t bitmap[], int32_t color, int32_t background, float scale, bool yx) {
+void OreonBSSD1351::drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t bitmap[], int32_t color, int32_t background, float scale, bool yx) {
   if (x >= width || y >= height || x < -w * scale || y < -h * scale) return;
   if (color == -1) color = textColor;
   if (background == -1) background = backgroundColor;

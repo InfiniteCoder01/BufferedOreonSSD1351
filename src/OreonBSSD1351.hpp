@@ -88,7 +88,7 @@ protected:
   uint8_t *bufferW;
 
   uint8_t fontW, fontH;
-  const PROGMEM uint8_t *font;
+  const uint8_t *font;
   bool fontType;
 
   uint8_t width, height;
@@ -253,12 +253,12 @@ public:
   }
 
   /********** IMAGES **********/
-  void drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const PROGMEM uint8_t bitmap[], int32_t color = -1, int32_t background = -1, float scale = 1, bool yx = false);
+  void drawBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t bitmap[], int32_t color = -1, int32_t background = -1, float scale = 1, bool yx = false);
   inline void drawBitmap(VectorMath::vec2i pos, VectorMath::vec2i size, const uint8_t bitmap[], int32_t color = -1, int32_t background = -1, float scale = 1) {
     drawBitmap(pos.x, pos.y, size.x, size.y, bitmap, color, background, scale);
   }
 
-  void drawBackground(const PROGMEM uint8_t background[]) { memcpy_P(buffer, background, width * height * 2); }
+  void drawBackground(const uint8_t background[]) { memcpy_P(buffer, background, width * height * 2); }
 
   void fastDrawImage(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t image[]);
   inline void fastDrawImage(VectorMath::vec2i pos, VectorMath::vec2i size, const uint8_t image[]) {
@@ -298,14 +298,14 @@ public:
   // }
 
   /********** TEXT **********/
-  void setFont(const PROGMEM uint8_t *font) {
+  void setFont(const uint8_t *font) {
     this->font = font + 3;
     fontW = pgm_read_byte(&font[0]);
     fontH = pgm_read_byte(&font[1]);
     fontType = pgm_read_byte(&font[2]);
   }
 
-  const PROGMEM uint8_t *getFont() const {
+  const uint8_t *getFont() const {
     return font - 3;
   }
 
