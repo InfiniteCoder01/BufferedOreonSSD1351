@@ -1,4 +1,4 @@
-const unsigned char PROGMEM fontPico8[] = {
+const unsigned char fontPico8[] PROGMEM = {
   // width, height, type, font
   4, 5, 0,
   0x0,

@@ -1,4 +1,4 @@
-const unsigned char PROGMEM font5x7[] = {
+const unsigned char font5x7[] PROGMEM = {
     // width, height, type, font
     5, 7, 1,
 

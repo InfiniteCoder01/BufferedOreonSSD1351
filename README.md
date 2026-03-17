@@ -4,4 +4,5 @@
 
 Library for SSD1351 displays and ESP8266/ESP32/RP2040
 
-TileEngine map editor: https://github.com/InfiniteCoder01/OreMaper
+Used to use [this](https://github.com/InfiniteCoder01/OreMaper) TileEngine map editor,
+but it is so outdated rn, that I have no idea.
