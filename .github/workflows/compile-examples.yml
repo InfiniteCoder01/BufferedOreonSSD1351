@@ -14,25 +14,28 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.board.fqbn }}
+    name: ${{ matrix.board.name }}
     runs-on: ubuntu-latest
 
     env:
-      SKETCHES_REPORTS_PATH: sketches-reports
+      SKETCHES_REPORTS_PATH: sketches-reports/${{ matrix.board.name }}
 
     strategy:
       fail-fast: false
       matrix:
         board:
-          - fqbn: esp8266:esp8266:generic
+          - name: esp8266
+            fqbn: esp8266:esp8266:generic
             platforms: |
               - name: esp8266:esp8266
                 source-url: http://arduino.esp8266.com/stable/package_esp8266com_index.json
-          - fqbn: esp32:esp32:esp32
+          - name: esp32
+            fqbn: esp32:esp32:esp32
             platforms: |
               - name: esp32:esp32
                 source-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          - fqbn: rp2040:rp2040:rpipico
+          - name: rp2040
+            fqbn: rp2040:rp2040:rpipico
             platforms: |
               - name: rp2040:rp2040
                 source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
@@ -51,7 +54,9 @@ jobs:
           libraries: |
             - source-path: ./
             ${{ matrix.board.libraries }}
-          sketch-paths: ${{ env.UNIVERSAL_SKETCH_PATHS }}
+          sketch-paths: |
+            - examples/test
+            ${{ matrix.board.examples }}
 
       - name: Save memory usage change report as artifact
         uses: actions/upload-artifact@v4
