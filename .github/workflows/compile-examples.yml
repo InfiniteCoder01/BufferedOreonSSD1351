@@ -1,15 +1,23 @@
 name: Compile Examples
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "examples/**"
+      - "src/**"
+  pull_request:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "examples/**"
+      - "src/**"
 
 jobs:
   build:
+    name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
 
     env:
-      UNIVERSAL_LIBRARIES: |
-        - source-path: ./
-
       SKETCHES_REPORTS_PATH: sketches-reports
 
     strategy:
@@ -31,25 +39,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      # - name: Install ESP32 platform dependencies
-      #   if: startsWith(matrix.board.fqbn, 'esp32:esp32')
-      #   run: pip3 install pyserial
+        uses: actions/checkout@v6
 
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          cli-compile-flags: |
-            - --warnings="none"
           fqbn: ${{ matrix.board.fqbn }}
           platforms: ${{ matrix.board.platforms }}
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
           libraries: |
             - source-path: ./
-            - name: LinkedList
-
+            ${{ matrix.board.libraries }}
+          sketch-paths: ${{ env.UNIVERSAL_SKETCH_PATHS }}
 
       - name: Save memory usage change report as artifact
         uses: actions/upload-artifact@v4
