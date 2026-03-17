@@ -56,7 +56,7 @@ template <typename T1, typename T2> inline OREON_MATH_AUTO min(T1 a, T2 b) { ret
 template <typename T1, typename T2> inline OREON_MATH_AUTO max(T1 a, T2 b) { return a > b ? a : b; }
 template <typename T1, typename T2, typename T3> inline OREON_MATH_AUTO clamp(T1 val, T2 _min, T3 _max) { return min(max(val, _min), _max); }
 template <typename T1, typename T2, typename T3> inline OREON_MATH_AUTO clampW(T1 val, T2 _min, T3 size) { return clamp(val, _min, _min + size); }
-static float smoothstep(float _min, float _max, float t) {
+inline float smoothstep(float _min, float _max, float t) {
   t = clamp((t - _min) / (_max - _min), 0, 1);
   return t * t * (3 - 2 * t);
 }
