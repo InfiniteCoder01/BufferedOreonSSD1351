@@ -1,5 +1,5 @@
 #include <OreonBSSD1351.hpp>
-// #include <OreonBSSD1351Gui.hpp>
+#include <OreonBSSD1351Gui.hpp>
 #include "images.hpp"
 
 OreonBSSD1351 oled;
@@ -28,8 +28,8 @@ void setup()  {
     oled.update();
     delay(100);
   }
-
   delay(1000);
+
   oled.clear(); // same as fillScreen(textBackgroundColor), or if textBackgroundColor is transparent(same as textColor) fillScreen(BLACK)
   oled.drawBitmap(0, 0, 16, 16, bmp, RED, WHITE); // drawBitmap(x, y, width, height, bitmap, color = textColor, background = textBackgroundColor)
   oled.drawImage(16, 0, 16, 16, img); // drawImage(x, y, width, height, image, alphaColor = -1), alphaColor is transparency color. There is also fastDrawImage
@@ -40,35 +40,36 @@ void setup()  {
   oled.println("Some text..."); // You can use plain print() without newline or write to write single char
   oled.textSize = 1;
   oled.update();
+  delay(2000);
 
-  delay(1000);
   oled.clear();
   oled.setCursor(0, 0);
   oled.flip = true;
   oled.println("GG!");
-  oled.flip = false; // You can also disable wrap with "oled.wrap = false;", by default it's true
+  oled.flip = false; // You can also disable wrap with "oled.wrap = false;", by default it's enabled
   oled.update();
-
   delay(1000);
+
   oled.clear();
-  // gui::drawList("List name", listElements, 5, 3); // gui::drawList(listName, listElements, countOfElements, pointer)
+  gui::drawList(oled, "List name", listElements, 5, 3); // gui::drawList(oled, listName, listElements, countOfElements, pointer)
   oled.update();
+  delay(3000);
 
-  delay(1000);
   oled.clear();
   oled.setCursor(0, 0);
-  // gui::type("Typing text...", 300); // gui::type(text, typingDelay = 100ms by default)
+  gui::type(oled, "Typing text...", 300); // gui::type(oled, text, typingDelay = 100ms by default); there is also a utility gui::typeAsync, which returns a substring based off time
   oled.update();
+  delay(2000);
 }
 
 void loop() {
   oled.clear();
-  // gui::centerText("Hi", 10); //  gui::centerText(text, yPos = center (-1));
-  // gui::textAt("Hi!\nMultiline text here!", 20, 20); // gui::textAt(text, x, y) - Can draw left-aligned multiline text
-  // gui::rightText("Right aligned text", 50); // gui::rightText(text, yPos); - align the text to right
-  // gui::centerText("Hi\x7f\x80\x81\x82", 128 - oled.getCharHeight()); // Use getCharHeight() to get the height of the character in pixels, \x7f\x80 to create the x sign on pico8 font and  \x81\x82 to create the y sign on pico8 font
-  // gui::textAt("Hi", 64 - oled.getStringWidth("Hi"), 64); // Use getStringWidth(text) to get the width of the string in pixels
+  gui::centerText(oled, "Hi", 10); //  gui::centerText(text, yPos = center (-1));
+  gui::textAt(oled, "Hi!\nMultiline text here!", 20, 20); // gui::textAt(text, x, y) - Can draw left-aligned multiline text
+  gui::rightText(oled, "Right aligned text", 50); // gui::rightText(text, yPos); - align the text to right
+  gui::centerText(oled, "Hi\x7f\x80\x81\x82", 128 - oled.getCharHeight()); // Use getCharHeight() to get the height of the character in pixels, \x7f\x80 to create the x sign on pico8 font and  \x81\x82 to create the y sign on pico8 font
+  gui::textAt(oled, "Hi", 64 - oled.getStringWidth("Hi") / 2, 64); // Use getStringWidth(text) to get the width of the string in pixels
   oled.drawLine(64, 0, 70, 10, RED, 3); // drawLine(x0, y0, x1, y1, color, thickness = 1)
-  // gui::drawFPS();
+  gui::drawFPS(oled);
   oled.update();
 }

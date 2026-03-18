@@ -68,19 +68,27 @@ const uint16_t WHITE = 0xFFFF;
 inline uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) { return r | (uint16_t)g << 5 | (uint16_t)b << 11; }
 inline uint16_t rgb888to565(uint8_t r, uint8_t g, uint8_t b) { return rgb565(r >> 3, g >> 2, b >> 3); }
 inline uint16_t interpolateColor(uint16_t color1, uint16_t color2, float t) {
-  int r1 = (color1 & 0b00011111), g1 = (color1 >> 5 & 0b00111111), b1 = (color1 >> 11 & 0b00011111);
-  int r2 = (color2 & 0b00011111), g2 = (color2 >> 5 & 0b00111111), b2 = (color2 >> 11 & 0b00011111);
+  int r1 = (color1 & 31), g1 = (color1 >> 5 & 63), b1 = (color1 >> 11 & 31);
+  int r2 = (color2 & 31), g2 = (color2 >> 5 & 63), b2 = (color2 >> 11 & 31);
   int r = Math::lerp(r1, r2, t);
   int g = Math::lerp(g1, g2, t);
   int b = Math::lerp(b1, b2, t);
   return rgb565(r, g, b);
 }
 
-enum TextAlignment : int8_t {
-  LEFT = -1,
-  CENTER = 0,
-  RIGHT = 1
-};
+inline uint16_t contrastColor(uint16_t color) {
+  uint8_t r = (color & 31), g = (color >> 6 & 31), b = (color >> 11 & 31);
+  uint8_t brightness = ((uint16_t)r + g + b) / 3;
+  return brightness < 16 ? WHITE : BLACK;
+}
+
+inline uint16_t darkenColor(uint16_t color, uint8_t mul) {
+  uint8_t r = (color & 31), g = (color >> 5 & 63), b = (color >> 11 & 31);
+  r = (uint16_t)r * mul / 255;
+  g = (uint16_t)g * mul / 255;
+  b = (uint16_t)b * mul / 255;
+  return rgb565(r, g, b);
+}
 
 class OreonBSSD1351 : public Print {
 protected:
@@ -100,7 +108,6 @@ public:
   int16_t cursorX = 0, cursorY = 0;
   float textSize = 1.0;
   uint16_t textColor = WHITE, backgroundColor = WHITE;
-  TextAlignment textAlignment = LEFT;
 
   bool flip = false; // Wether to flip all images
   bool wrap = true; // Wether to wrap text

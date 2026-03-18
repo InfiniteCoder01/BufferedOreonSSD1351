@@ -1,80 +1,34 @@
 #pragma once
-#include <stdint.h>
 #include "OreonBSSD1351.hpp"
 
 namespace gui {
-OREON_BSSD_DECL void darkenRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t alpha) {
-  if (x >= oled::width || y >= oled::height || x <= -w || y <= -h) return;
+enum TextAlignment : int8_t {
+  LEFT = -1,
+  TOP = -1,
+  CENTER = 0,
+  RIGHT = 1,
+  BOTTOM = 1,
+};
 
-  if (x < 0) w += x, x = 0;
-  if (y < 0) h += y, y = 0;
-  if (x + w > oled::width) w = oled::width - x;
-  if (y + h > oled::height) h = oled::height - y;
-
-  for (uint8_t x1 = x; x1 < x + w; x1++) {
-    for (uint8_t y1 = y; y1 < y + h; y1++) {
-      oled::_setPixel(x1, y1, oled::darkenColor(oled::_getPixel(x1, y1), alpha));
-    }
-  }
+void darkenRect(OreonBSSD1351 &oled, int16_t x, int16_t y, int16_t w, int16_t h, uint8_t alpha);
+void type(OreonBSSD1351 &oled, String text, uint16_t typeDelay = 100);
+inline String typeAsync(String text, uint32_t typeStart, uint16_t typeDelay = 100) {
+  return text.substring(0, (millis() - typeStart) / typeDelay);
 }
 
-OREON_BSSD_DECL void centerText(String text, int y = -1) {
-  oled::setCursor(oled::width / 2 - oled::getStringWidth(text) / 2, (y == -1 ? (oled::height / 2 - oled::getCharHeight() / 2) : y));
-  oled::println(text);
+void textAt(OreonBSSD1351 &oled, String text, int x, int y, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP);
+inline void textAt(OreonBSSD1351 &oled, String text, VectorMath::vec2i pos, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP) {
+  textAt(oled, text, pos.x, pos.y, horizontal, vertical);
 }
 
-OREON_BSSD_DECL void type(String text, uint16_t typeDelay = 100) {
-  for (int i = 0; i < text.length(); i++) {
-    uint32_t t = millis();
-    oled::write(text[i]);
-    oled::update();
-    while (millis() - t < typeDelay) yield();
-  }
+inline void centerText(OreonBSSD1351 &oled, String text, int y = -1) {
+  textAt(oled, text, oled.getWidth() / 2, y == -1 ? oled.getHeight() / 2 : y, CENTER, y == -1 ? CENTER : TOP);
 }
 
-OREON_BSSD_DECL String typeAsync(String text, uint32_t typeStart, uint16_t typeDelay = 100) { return text.substring(0, (millis() - typeStart) / typeDelay); }
-
-OREON_BSSD_DECL void textAt(String text, int x, int y) {
-  while (true) {
-    oled::setCursor(x, y);
-    if (text.indexOf('\n') == -1) {
-      oled::print(text);
-      return;
-    } else {
-      oled::print(text.substring(0, text.indexOf('\n')));
-      y += oled::getCharHeight() + 1;
-      text = text.substring(text.indexOf('\n') + 1);
-    }
-  }
+inline void rightText(OreonBSSD1351 &oled, String text, int y = 0) {
+  textAt(oled, text, oled.getWidth(), y, RIGHT);
 }
 
-OREON_BSSD_DECL void rightText(String text, int y = 0) {
-  oled::setCursor(oled::width - oled::getStringWidth(text), y);
-  oled::print(text);
-}
-
-OREON_BSSD_DECL void drawList(String name, String* elements, uint8_t elementCount, uint8_t pointer) {
-  centerText(name, 0);
-  for (int i = 0; i < elementCount; i++) {
-    if (i == pointer) {
-      oled::write('>');
-    } else {
-      oled::write(' ');
-    }
-    oled::println(elements[i]);
-  }
-}
-
-OREON_BSSD_DECL void drawFPS() {
-  static uint32_t t;
-  static uint16_t prev;
-  oled::setCursor(1, 1);
-  uint16_t dt = millis() - t;
-  t = millis();
-  uint16_t approx = (prev + dt) / 2;
-  prev = dt;
-  oled::println(("FPS: " + String(1000.0 / approx, 1)).c_str());
-}
-
-OREON_BSSD_DECL void textAt(String text, VectorMath::vec2i pos) { textAt(text, pos.x, pos.y); }
+void drawList(OreonBSSD1351 &oled, String name, String* elements, uint8_t elementCount, uint8_t pointer);
+void drawFPS(OreonBSSD1351 &oled);
 }  // namespace gui
