@@ -16,7 +16,7 @@ void darkenRect(OreonBSSD1351 &oled, int16_t x, int16_t y, int16_t w, int16_t h,
   }
 }
 
-void type(OreonBSSD1351 &oled, String text, uint16_t typeDelay) {
+void type(OreonBSSD1351 &oled, const String &text, uint16_t typeDelay) {
   for (int i = 0; i < text.length(); i++) {
     uint32_t t = millis();
     oled.write(text[i]);
@@ -25,7 +25,7 @@ void type(OreonBSSD1351 &oled, String text, uint16_t typeDelay) {
   }
 }
 
-void textAt(OreonBSSD1351 &oled, String text, int x, int y, TextAlignment horizontal, TextAlignment vertical) {
+void textAt(OreonBSSD1351 &oled, const String &text, int x, int y, TextAlignment horizontal, TextAlignment vertical) {
   uint16_t maxWidth = 0, totalHeight = -1;
   for (int l = 0, r = text.indexOf('\n', l); l < text.length(); l = r + 1, r = text.indexOf('\n', l)) {
     if (r == -1) r = text.length();
@@ -41,9 +41,10 @@ void textAt(OreonBSSD1351 &oled, String text, int x, int y, TextAlignment horizo
     oled.print(text.substring(l, r));
     y += oled.getCharHeight() + 1;
   }
+  oled.println();
 }
 
-void drawList(OreonBSSD1351 &oled, String name, String* elements, uint8_t elementCount, uint8_t pointer) {
+void drawList(OreonBSSD1351 &oled, const String &name, const String *elements, uint8_t elementCount, uint8_t pointer) {
   centerText(oled, name, 0);
   for (int i = 0; i < elementCount; i++) {
     if (i == pointer) {

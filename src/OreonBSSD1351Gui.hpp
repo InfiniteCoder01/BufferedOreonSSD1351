@@ -11,24 +11,24 @@ enum TextAlignment : int8_t {
 };
 
 void darkenRect(OreonBSSD1351 &oled, int16_t x, int16_t y, int16_t w, int16_t h, uint8_t alpha);
-void type(OreonBSSD1351 &oled, String text, uint16_t typeDelay = 100);
-inline String typeAsync(String text, uint32_t typeStart, uint16_t typeDelay = 100) {
+void type(OreonBSSD1351 &oled, const String &text, uint16_t typeDelay = 100);
+inline String typeAsync(const String &text, uint32_t typeStart, uint16_t typeDelay = 100) {
   return text.substring(0, (millis() - typeStart) / typeDelay);
 }
 
-void textAt(OreonBSSD1351 &oled, String text, int x, int y, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP);
-inline void textAt(OreonBSSD1351 &oled, String text, VectorMath::vec2i pos, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP) {
+void textAt(OreonBSSD1351 &oled, const String &text, int x, int y, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP);
+inline void textAt(OreonBSSD1351 &oled, const String &text, VectorMath::vec2i pos, TextAlignment horizontal = LEFT, TextAlignment vertical = TOP) {
   textAt(oled, text, pos.x, pos.y, horizontal, vertical);
 }
 
-inline void centerText(OreonBSSD1351 &oled, String text, int y = -1) {
+inline void centerText(OreonBSSD1351 &oled, const String &text, int y = -1) {
   textAt(oled, text, oled.getWidth() / 2, y == -1 ? oled.getHeight() / 2 : y, CENTER, y == -1 ? CENTER : TOP);
 }
 
-inline void rightText(OreonBSSD1351 &oled, String text, int y = 0) {
+inline void rightText(OreonBSSD1351 &oled, const String &text, int y = 0) {
   textAt(oled, text, oled.getWidth(), y, RIGHT);
 }
 
-void drawList(OreonBSSD1351 &oled, String name, String* elements, uint8_t elementCount, uint8_t pointer);
+void drawList(OreonBSSD1351 &oled, const String &name, const String *elements, uint8_t elementCount, uint8_t pointer);
 void drawFPS(OreonBSSD1351 &oled);
 }  // namespace gui
