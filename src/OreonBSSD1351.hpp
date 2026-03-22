@@ -10,6 +10,8 @@
 #ifndef SPI_SPEED
 #if defined(ESP8266)
 #define SPI_SPEED 7999999
+#elif defined(ESP32)
+#define SPI_SPEED 39999999
 #elif defined(__AVR__)
 #define SPI_SPEED 8000000
 #elif defined(__SAM3X8E__)
